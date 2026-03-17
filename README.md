@@ -54,3 +54,6 @@ dot checkout
 # 6. Run install script
 ~/install.sh
 ```
+
+## Inspired by
+Connor Adams: https://github.com/connorads/dotfiles
