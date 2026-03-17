@@ -2,26 +2,32 @@
 export EDITOR=nvim
 export VISUAL=nvim
 export GPG_TTY=$(tty)
-export HOMEBREW_NO_AUTO_UPDATE=1
+
+# ─── Platform detection ──────────────────────────────────────────────
+OS="$(uname -s)"
 
 # ─── PATH ─────────────────────────────────────────────────────────────
-export PATH="/Users/laurence/.antigravity/antigravity/bin:$PATH"  # Antigravity
-export PATH="$PATH:/Users/laurence/.local/bin"
+export PATH="$PATH:$HOME/.local/bin"
+
+if [[ "$OS" == "Darwin" ]]; then
+  export HOMEBREW_NO_AUTO_UPDATE=1
+  export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
+fi
 
 # ─── Tool initialisation ─────────────────────────────────────────────
-. "$HOME/.cargo/env"
+[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
-gpgconf --launch gpg-agent
+command -v gpgconf &>/dev/null && gpgconf --launch gpg-agent
 
 eval "$(direnv hook zsh)"
 eval "$(starship init zsh)"
 
 # Atuin shell history
-. "$HOME/.atuin/bin/env"
+[[ -f "$HOME/.atuin/bin/env" ]] && . "$HOME/.atuin/bin/env"
 eval "$(atuin init zsh --disable-up-arrow)"
 
 # fzf key bindings and fuzzy completion
@@ -52,8 +58,16 @@ alias lsql="lazysql"
 
 # Git
 alias dot='git --git-dir=$HOME/git/dotfiles --work-tree=$HOME'
-alias lgdot='lazygit -g $HOME/git/dotfiles -w $HOME'
+alias dotlg='lazygit -g $HOME/git/dotfiles -w $HOME'
 alias pob='push_one_by_one'
+
+# Nix
+if [[ "$OS" == "Darwin" ]]; then
+  alias drs='darwin-rebuild switch --flake ~/.config/nix'
+else
+  alias hms='home-manager switch --flake ~/.config/nix'
+fi
+alias nfu='nix flake update --flake ~/.config/nix'
 
 # Python / linting
 alias f=".venv/bin/ruff format . && .venv/bin/ruff check . --fix"
@@ -62,8 +76,8 @@ alias f=".venv/bin/ruff format . && .venv/bin/ruff check . --fix"
 alias tojpg='img tojpg'
 alias pad='img pad'
 
-# SSH
-alias nuc="ssh 192.168.88.200"
+# SSH (only on Mac — you're already on the NUC if on Linux)
+[[ "$OS" == "Darwin" ]] && alias nuc="ssh 192.168.88.200"
 
 # ─── Functions ────────────────────────────────────────────────────────
 # Push commits one-by-one to trigger CI for each
@@ -75,18 +89,25 @@ push_one_by_one() {
         xargs -I{} git push origin {}:"$target_branch" -f
 }
 
+# Cross-platform clipboard
+if [[ "$OS" == "Darwin" ]]; then
+  _clip_copy() { pbcopy; }
+else
+  _clip_copy() { xclip -selection clipboard; }
+fi
+
 # Copy file contents to clipboard
 clip() {
   if [[ $# -eq 0 ]]; then
     echo "Usage: clip <file...>" >&2
     return 1
   fi
-  cat "$@" | pbcopy
-  echo "📋 Copied $* to clipboard"
+  cat "$@" | _clip_copy
+  echo "Copied $* to clipboard"
 }
 
 # Pick a file with fzf and copy its contents
-clipf() { cat "$(fzf)" | pbcopy; }
+clipf() { cat "$(fzf)" | _clip_copy; }
 
 # Show current Ghostty theme
 theme() {
