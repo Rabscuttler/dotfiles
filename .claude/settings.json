@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/laurence/.claude/hooks/peon-ping/peon.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/laurence/.claude/hooks/peon-ping/peon.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/laurence/.claude/hooks/peon-ping/peon.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/laurence/.claude/hooks/peon-ping/peon.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/laurence/.claude/hooks/peon-ping/peon.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "rust-analyzer-lsp@claude-plugins-official": true
+  },
+  "alwaysThinkingEnabled": true,
+  "skipDangerousModePermissionPrompt": true,
+  "feedbackSurveyState": {
+    "lastShownTime": 1754323154325
+  }
+}

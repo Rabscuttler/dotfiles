@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cfg_dir="${XDG_CONFIG_HOME:-$HOME/.config}/ghostty"
+inc="$cfg_dir/theme-local.conf"
+
+# pick a real theme name (strip " (…)" decorations)
+if command -v shuf >/dev/null 2>&1; then
+  pick="$(ghostty +list-themes --plain | sed 's/ ([^)]*)$//' | shuf -n1)"
+else
+  pick="$(ghostty +list-themes --plain | sed 's/ ([^)]*)$//' \
+    | awk 'BEGIN{srand()} {a[NR]=$0} END{print a[int(rand()*NR)+1]}')"
+fi
+
+printf 'theme = "%s"\n' "$pick" > "$inc"
+
+# reload config (quiet)
+if command -v osascript >/dev/null 2>&1; then
+osascript >/dev/null <<'APPLESCRIPT'
+tell application "Ghostty" to activate
+tell application "System Events"
+  tell process "Ghostty"
+    click menu item "Reload Configuration" of menu "Ghostty" of menu bar item "Ghostty" of menu bar 1
+  end tell
+end tell
+APPLESCRIPT
+elif command -v xdotool >/dev/null 2>&1; then
+  wid="$(xdotool search --class Ghostty | head -n1 || true)"
+  [ -n "$wid" ] && xdotool windowactivate "$wid" key --clearmodifiers ctrl+shift+comma >/dev/null 2>&1
+fi
+

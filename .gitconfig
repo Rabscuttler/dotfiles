@@ -1,0 +1,22 @@
+[credential "https://github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper = 
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[user]
+	name = Laurence Watson
+	email = laurence@furbnow.com
+[gpg]
+	program = gpg
+[commit]
+	gpgsign = true
+[alias]
+	sync = !git fetch origin $1 && git reset --hard origin/$1
+[core]
+	editor = vim
+[filter "lfs"]
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f

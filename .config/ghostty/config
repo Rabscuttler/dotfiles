@@ -1,0 +1,16 @@
+quick-terminal-animation-duration = 0.1
+
+theme = "Dark Pastel"
+split-divider-color = #88c0d0
+
+keybind = shift+enter=text:\n
+
+# Enable random themes - Sept 2025
+config-file = ~/.config/ghostty/theme-local.conf
+
+# Send unique CSI sequences that your shell will catch
+keybind = ctrl+apostrophe=csi:999~
+keybind = ctrl+semicolon=csi:998~
+keybind = cmd+comma=text:\x1b:nvim ~/.config/ghostty/config\r
+
+background-opacity = 0.9 

@@ -1,0 +1,4 @@
+[global]
+log_format = ""      # disable normal logging
+hide_env_diff = true  # also hide the env diff line
+

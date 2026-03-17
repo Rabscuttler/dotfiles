@@ -1,0 +1,17 @@
+[aws]
+disabled = true
+
+[package]
+disabled = true
+
+[python]
+
+[nodejs]
+disabled = true
+
+[git_branch]
+format = '[$symbol$branch(:$remote_branch)](bold 208) '
+symbol = '🌱 '
+
+[git_status]
+disabled = true
