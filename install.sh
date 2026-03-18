@@ -2,19 +2,55 @@
 set -euo pipefail
 
 OS="$(uname -s)"
+DOTFILES_REPO="https://github.com/Rabscuttler/dotfiles.git"
+DOTFILES_DIR="$HOME/git/dotfiles"
+
 echo "==> Setting up dotfiles on $OS..."
 
-# ─── Install Nix (Determinate Systems) ────────────────────────────────
+# ─── Prerequisites (Linux) ───────────────────────────────────────────
+if [[ "$OS" == "Linux" ]]; then
+  for pkg in git zsh curl; do
+    if ! command -v "$pkg" &>/dev/null; then
+      echo "==> Installing $pkg..."
+      sudo apt-get update -y && sudo apt-get install -y "$pkg"
+    fi
+  done
+fi
+
+# ─── Install Nix (Determinate Systems) ───────────────────────────────
 if ! command -v nix &>/dev/null; then
   echo "==> Installing Nix..."
   curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install
-  # Source nix for this session
   if [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
     . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
   fi
 fi
 
-# ─── macOS ────────────────────────────────────────────────────────────
+# ─── Clone dotfiles ──────────────────────────────────────────────────
+if [[ ! -d "$DOTFILES_DIR" ]]; then
+  echo "==> Cloning dotfiles..."
+  mkdir -p "$(dirname "$DOTFILES_DIR")"
+  git clone --bare "$DOTFILES_REPO" "$DOTFILES_DIR"
+
+  _dot() { git --git-dir="$DOTFILES_DIR" --work-tree="$HOME" "$@"; }
+
+  # Backup any conflicting files
+  _dot checkout 2>&1 | grep "^\t" | while IFS= read -r file; do
+    file="${file#"${file%%[![:space:]]*}"}"  # trim leading whitespace
+    if [[ -f "$HOME/$file" ]]; then
+      echo "    Backing up $file -> $file.bak"
+      mv "$HOME/$file" "$HOME/$file.bak"
+    fi
+  done
+  _dot checkout -f
+
+  echo "==> Dotfiles checked out."
+else
+  echo "==> Dotfiles already cloned, pulling latest..."
+  git --git-dir="$DOTFILES_DIR" --work-tree="$HOME" pull || true
+fi
+
+# ─── macOS ───────────────────────────────────────────────────────────
 if [[ "$OS" == "Darwin" ]]; then
   # Xcode CLI tools
   if ! xcode-select -p &>/dev/null; then
@@ -32,31 +68,27 @@ if [[ "$OS" == "Darwin" ]]; then
   fi
 
   # Build and activate nix-darwin configuration
-  echo "==> Running nix-darwin switch..."
-  nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/.config/nix
+  echo "==> Running nix-darwin switch (requires sudo)..."
+  sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/.config/nix
 fi
 
-# ─── Linux ────────────────────────────────────────────────────────────
+# ─── Linux ───────────────────────────────────────────────────────────
 if [[ "$OS" == "Linux" ]]; then
-  # Install zsh if not present
-  if ! command -v zsh &>/dev/null; then
-    echo "==> Installing zsh..."
-    sudo apt-get update && sudo apt-get install -y zsh
-  fi
-
   # Build and activate home-manager configuration
   echo "==> Running home-manager switch..."
   nix run home-manager/master -- switch -b backup --flake ~/.config/nix#laurence@nuc
 
   # Set zsh as default shell
-  ZSH_PATH="$(which zsh)"
-  if [[ "$SHELL" != "$ZSH_PATH" ]]; then
+  ZSH_PATH="$(which zsh 2>/dev/null || true)"
+  if [[ -n "$ZSH_PATH" && "$SHELL" != "$ZSH_PATH" ]]; then
     echo "==> Setting zsh as default shell..."
+    # Add to /etc/shells if not already there
+    grep -qxF "$ZSH_PATH" /etc/shells 2>/dev/null || echo "$ZSH_PATH" | sudo tee -a /etc/shells
     chsh -s "$ZSH_PATH"
   fi
 fi
 
-# ─── Cross-platform ──────────────────────────────────────────────────
+# ─── Cross-platform ─────────────────────────────────────────────────
 # Rust / Cargo
 if ! command -v cargo &>/dev/null; then
   echo "==> Installing Rust..."
@@ -74,4 +106,4 @@ fi
 chmod +x "$HOME/.config/ghostty/bin/"* 2>/dev/null || true
 chmod +x "$HOME/.config/ghostty/random_theme.sh" 2>/dev/null || true
 
-echo "==> Done! Open a new terminal to pick up shell changes."
+echo "==> Done! Open a new terminal (or run 'exec zsh -l') to pick up shell changes."
