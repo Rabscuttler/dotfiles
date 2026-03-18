@@ -46,7 +46,7 @@ if [[ "$OS" == "Linux" ]]; then
 
   # Build and activate home-manager configuration
   echo "==> Running home-manager switch..."
-  nix run home-manager/master -- switch --flake ~/.config/nix#laurence@nuc
+  nix run home-manager/master -- switch -b backup --flake ~/.config/nix#laurence@nuc
 
   # Set zsh as default shell
   ZSH_PATH="$(which zsh)"
