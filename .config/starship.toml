@@ -1,3 +1,14 @@
+[hostname]
+ssh_only = true
+format = '[$ssh_symbol$hostname]($style) '
+style = 'bold blue'
+ssh_symbol = '🌐 '
+
+[username]
+show_always = false
+format = '[$user]($style) in '
+style_user = 'bold green'
+
 [aws]
 disabled = true
 

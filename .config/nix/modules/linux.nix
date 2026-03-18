@@ -6,7 +6,13 @@
   home.homeDirectory = "/home/laurence";
   home.stateVersion = "24.11";
 
-  home.packages = packages.corePackages;
+  home.packages = packages.corePackages ++ [
+    pkgs.nerd-fonts.fira-code
+    pkgs.kitty.terminfo  # provides common terminfo entries
+  ];
+
+  # Fonts
+  fonts.fontconfig.enable = true;
 
   # Enable Nix PATH and environment for non-NixOS Linux
   targets.genericLinux.enable = true;

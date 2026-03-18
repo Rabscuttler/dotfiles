@@ -14,6 +14,12 @@ if [[ "$OS" == "Darwin" ]]; then
   export PATH="$HOME/.antigravity/antigravity/bin:$PATH"
 fi
 
+# ─── Terminal fixes ───────────────────────────────────────────────────
+# Fall back to xterm-256color if terminfo not available (e.g. SSH with Ghostty)
+if ! infocmp "$TERM" &>/dev/null 2>&1; then
+  export TERM=xterm-256color
+fi
+
 # ─── Tool initialisation ─────────────────────────────────────────────
 [[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
 
