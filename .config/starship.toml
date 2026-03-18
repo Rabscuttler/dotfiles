@@ -2,7 +2,7 @@
 ssh_only = true
 format = '[$ssh_symbol$hostname]($style) '
 style = 'bold blue'
-ssh_symbol = '🌐 '
+ssh_symbol = '📡 '
 
 [username]
 show_always = false
