@@ -23,15 +23,20 @@ export NVM_DIR="$HOME/.nvm"
 
 command -v gpgconf &>/dev/null && gpgconf --launch gpg-agent
 
-eval "$(direnv hook zsh)"
-eval "$(starship init zsh)"
+# Nix home-manager PATH (Linux — on macOS, nix-darwin sets this via /etc/zshenv)
+if [[ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]]; then
+  . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+fi
+
+command -v direnv &>/dev/null && eval "$(direnv hook zsh)"
+command -v starship &>/dev/null && eval "$(starship init zsh)"
 
 # Atuin shell history
 [[ -f "$HOME/.atuin/bin/env" ]] && . "$HOME/.atuin/bin/env"
-eval "$(atuin init zsh --disable-up-arrow)"
+command -v atuin &>/dev/null && eval "$(atuin init zsh --disable-up-arrow)"
 
 # fzf key bindings and fuzzy completion
-source <(fzf --zsh)
+command -v fzf &>/dev/null && source <(fzf --zsh)
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --exclude .git --exclude __pycache__ --exclude .venv'
 
 # Ghostty shell integration
