@@ -26,6 +26,12 @@ if ! command -v nix &>/dev/null; then
   fi
 fi
 
+# ─── Ensure git is available ─────────────────────────────────────────
+if ! command -v git &>/dev/null; then
+  echo "==> Getting git via Nix..."
+  nix profile install nixpkgs#git
+fi
+
 # ─── Clone dotfiles ──────────────────────────────────────────────────
 if [[ ! -d "$DOTFILES_DIR" ]]; then
   echo "==> Cloning dotfiles..."
@@ -50,23 +56,23 @@ else
   git --git-dir="$DOTFILES_DIR" --work-tree="$HOME" pull || true
 fi
 
-# ─── macOS ───────────────────────────────────────────────────────────
+# ─── Nix packages & system config ────────────────────────────────────
 if [[ "$OS" == "Darwin" ]]; then
   # Homebrew (for casks only — CLI tools come from Nix)
+  # Must be installed before nix-darwin since darwin.nix manages casks
   if ! command -v brew &>/dev/null; then
     echo "==> Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     eval "$(/opt/homebrew/bin/brew shellenv)"
   fi
 
-  # Build and activate nix-darwin configuration
+  # Build and activate nix-darwin configuration (installs all packages + system defaults)
   echo "==> Running nix-darwin switch (requires sudo)..."
   sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/.config/nix
 fi
 
-# ─── Linux ───────────────────────────────────────────────────────────
 if [[ "$OS" == "Linux" ]]; then
-  # Build and activate home-manager configuration
+  # Build and activate home-manager configuration (installs all packages)
   echo "==> Running home-manager switch..."
   nix run home-manager/master -- switch -b backup --flake ~/.config/nix#laurence@nuc
 
@@ -74,13 +80,12 @@ if [[ "$OS" == "Linux" ]]; then
   ZSH_PATH="$(which zsh 2>/dev/null || true)"
   if [[ -n "$ZSH_PATH" && "$SHELL" != "$ZSH_PATH" ]]; then
     echo "==> Setting zsh as default shell..."
-    # Add to /etc/shells if not already there
     grep -qxF "$ZSH_PATH" /etc/shells 2>/dev/null || echo "$ZSH_PATH" | sudo tee -a /etc/shells
     chsh -s "$ZSH_PATH"
   fi
 fi
 
-# ─── Cross-platform ─────────────────────────────────────────────────
+# ─── Manual toolchains ───────────────────────────────────────────────
 # Rust / Cargo
 if ! command -v cargo &>/dev/null; then
   echo "==> Installing Rust..."
