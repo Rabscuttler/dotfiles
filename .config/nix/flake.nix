@@ -27,14 +27,28 @@
       mkPackages = pkgs: import ./modules/packages.nix { inherit pkgs; };
     in
     {
-      # macOS: darwin-rebuild switch --flake ~/.config/nix (alias: drs)
-      darwinConfigurations."Laurences-MacBook-Pro" = nix-darwin.lib.darwinSystem {
+      # macOS: darwin-rebuild switch --flake ~/.config/nix#personal-mac (alias: drs)
+      darwinConfigurations."personal-mac" = nix-darwin.lib.darwinSystem {
         specialArgs = {
           inherit self;
           packages = mkPackages (mkPkgs "aarch64-darwin");
         };
         modules = [
           ./modules/darwin.nix
+          ./modules/personal-mac.nix
+          home-manager.darwinModules.home-manager
+        ];
+      };
+
+      # macOS: darwin-rebuild switch --flake ~/.config/nix#work-mac
+      darwinConfigurations."work-mac" = nix-darwin.lib.darwinSystem {
+        specialArgs = {
+          inherit self;
+          packages = mkPackages (mkPkgs "aarch64-darwin");
+        };
+        modules = [
+          ./modules/darwin.nix
+          ./modules/work-mac.nix
           home-manager.darwinModules.home-manager
         ];
       };

@@ -66,9 +66,22 @@ if [[ "$OS" == "Darwin" ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
   fi
 
+  # Detect which Mac config to use
+  if [[ -z "${NIX_DARWIN_CONFIG:-}" ]]; then
+    echo "Which Mac is this?"
+    echo "  1) personal-mac (MacBook Pro)"
+    echo "  2) work-mac (MacBook Air)"
+    read -rp "Choose [1/2]: " choice
+    case "$choice" in
+      1) NIX_DARWIN_CONFIG="personal-mac" ;;
+      2) NIX_DARWIN_CONFIG="work-mac" ;;
+      *) echo "Invalid choice"; exit 1 ;;
+    esac
+  fi
+
   # Build and activate nix-darwin configuration (installs all packages + system defaults)
-  echo "==> Running nix-darwin switch (requires sudo)..."
-  sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/.config/nix
+  echo "==> Running nix-darwin switch for $NIX_DARWIN_CONFIG (requires sudo)..."
+  sudo nix run nix-darwin/master#darwin-rebuild -- switch --flake ~/.config/nix#"$NIX_DARWIN_CONFIG"
 fi
 
 if [[ "$OS" == "Linux" ]]; then

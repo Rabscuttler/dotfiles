@@ -74,7 +74,11 @@ alias pob='push_one_by_one'
 
 # Nix
 if [[ "$OS" == "Darwin" ]]; then
-  alias drs='darwin-rebuild switch --flake ~/.config/nix'
+  case "$(scutil --get LocalHostName 2>/dev/null)" in
+    macbook-air) _nix_host="work-mac" ;;
+    *)           _nix_host="personal-mac" ;;
+  esac
+  alias drs="sudo darwin-rebuild switch --flake ~/.config/nix#$_nix_host"
 else
   alias hms='home-manager switch --flake ~/.config/nix'
 fi
