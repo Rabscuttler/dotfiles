@@ -24,6 +24,28 @@
     };
   };
 
+  programs.tmux = {
+    enable = true;
+    mouse = true;
+    plugins = with pkgs.tmuxPlugins; [
+      yank
+      pain-control
+    ];
+    extraConfig = ''
+      set -g @yank_action 'copy-pipe-no-clear'
+
+      bind -T copy-mode    C-c send -X copy-pipe-no-clear "xsel -i --clipboard"
+      bind -T copy-mode-vi C-c send -X copy-pipe-no-clear "xsel -i --clipboard"
+
+      bind -T copy-mode    DoubleClick1Pane select-pane \; send -X select-word \; send -X copy-pipe-no-clear "xsel -i"
+      bind -T copy-mode-vi DoubleClick1Pane select-pane \; send -X select-word \; send -X copy-pipe-no-clear "xsel -i"
+      bind -n DoubleClick1Pane select-pane \; copy-mode -M \; send -X select-word \; send -X copy-pipe-no-clear "xsel -i"
+      bind -T copy-mode    TripleClick1Pane select-pane \; send -X select-line \; send -X copy-pipe-no-clear "xsel -i"
+      bind -T copy-mode-vi TripleClick1Pane select-pane \; send -X select-line \; send -X copy-pipe-no-clear "xsel -i"
+      bind -n TripleClick1Pane select-pane \; copy-mode -M \; send -X select-line \; send -X copy-pipe-no-clear "xsel -i"
+    '';
+  };
+
   programs.neovim.enable = true;
 
   programs.atuin = {

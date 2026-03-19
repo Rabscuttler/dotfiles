@@ -56,8 +56,11 @@ if [[ "$OS" == "Darwin" ]]; then
   if ! xcode-select -p &>/dev/null; then
     echo "==> Installing Xcode Command Line Tools..."
     xcode-select --install
-    echo "    Press any key once installation is complete."
-    read -n 1 -s
+    echo "    Waiting for Xcode CLI tools installation to complete..."
+    until xcode-select -p &>/dev/null; do
+      sleep 5
+    done
+    echo "    Xcode CLI tools installed."
   fi
 
   # Homebrew (for casks only — CLI tools come from Nix)

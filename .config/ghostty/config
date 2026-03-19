@@ -13,4 +13,4 @@ keybind = ctrl+apostrophe=csi:999~
 keybind = ctrl+semicolon=csi:998~
 keybind = cmd+comma=text:\x1b:nvim ~/.config/ghostty/config\r
 
-background-opacity = 0.9 
+background-opacity = 0.9

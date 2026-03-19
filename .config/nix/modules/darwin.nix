@@ -33,6 +33,10 @@
     NSGlobalDomain = {
       KeyRepeat = 2;
       InitialKeyRepeat = 25;
+      "com.apple.swipescrolldirection" = false;
+    };
+    finder = {
+      FXPreferredViewStyle = "Nlsv";
     };
     CustomUserPreferences = {
       "com.apple.AppleMultitouchTrackpad" = {
