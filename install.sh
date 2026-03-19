@@ -52,17 +52,6 @@ fi
 
 # ─── macOS ───────────────────────────────────────────────────────────
 if [[ "$OS" == "Darwin" ]]; then
-  # Xcode CLI tools
-  if ! xcode-select -p &>/dev/null; then
-    echo "==> Installing Xcode Command Line Tools..."
-    xcode-select --install
-    echo "    Waiting for Xcode CLI tools installation to complete..."
-    until xcode-select -p &>/dev/null; do
-      sleep 5
-    done
-    echo "    Xcode CLI tools installed."
-  fi
-
   # Homebrew (for casks only — CLI tools come from Nix)
   if ! command -v brew &>/dev/null; then
     echo "==> Installing Homebrew..."
