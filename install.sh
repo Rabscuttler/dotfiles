@@ -112,6 +112,18 @@ if [[ ! -d "$HOME/.nvm" ]]; then
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 fi
 
+# Load NVM and install Node + Claude Code
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+if ! command -v node &>/dev/null; then
+  echo "==> Installing Node (latest LTS)..."
+  nvm install --lts
+fi
+if ! command -v claude &>/dev/null; then
+  echo "==> Installing Claude Code..."
+  npm install -g @anthropic-ai/claude-code
+fi
+
 # Make ghostty bin scripts executable
 chmod +x "$HOME/.config/ghostty/bin/"* 2>/dev/null || true
 chmod +x "$HOME/.config/ghostty/random_theme.sh" 2>/dev/null || true

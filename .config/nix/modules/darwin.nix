@@ -19,7 +19,6 @@
       "1password"
       "alfred"
       "alt-tab"
-      "claude"
       "cursor"
       "discord"
       "firefox"
