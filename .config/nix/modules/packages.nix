@@ -30,6 +30,9 @@ let
     direnv
     starship
 
+    # Python
+    uv
+
     # Misc
     hyperfine
     pandoc
