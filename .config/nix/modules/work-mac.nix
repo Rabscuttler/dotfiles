@@ -2,6 +2,12 @@
 {
   networking.hostName = "macbook-air";
 
-  # Work-only casks (add here as needed)
-  # homebrew.casks = [ "slack" "zoom" ];
+  homebrew.casks = [
+    "dialpad"
+    "granola"
+    "linear-linear"
+    "obs"
+    "superhuman"
+    "zoom"
+  ];
 }

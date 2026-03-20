@@ -16,8 +16,24 @@
       "peonping/tap/peon-ping"
     ];
     casks = [
+      "1password"
+      "alfred"
+      "alt-tab"
+      "claude"
+      "cursor"
+      "discord"
       "firefox"
       "ghostty"
+      "google-chrome"
+      "gpg-suite"
+      "karabiner-elements"
+      "obsidian"
+      "rectangle"
+      "slack"
+      "spotify"
+      "tailscale"
+      "vlc"
+      "whatsapp"
     ];
   };
 

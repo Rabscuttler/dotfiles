@@ -2,6 +2,11 @@
 {
   # No hostname override — keep existing hostname
 
-  # Personal-only casks (add here as needed)
-  # homebrew.casks = [ "steam" ];
+  homebrew.casks = [
+    "balenaetcher"
+    "blender"
+    "obs"
+    "ollama"
+    "qbittorrent"
+  ];
 }
