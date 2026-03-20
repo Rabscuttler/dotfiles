@@ -53,6 +53,15 @@
     finder = {
       FXPreferredViewStyle = "Nlsv";
     };
+    # Disable Spotlight shortcut (Cmd+Space) — Alfred replaces it
+    CustomSystemPreferences = {
+      "com.apple.symbolichotkeys" = {
+        AppleSymbolicHotKeys = {
+          "64" = { enabled = false; };  # Cmd+Space (Spotlight)
+          "65" = { enabled = false; };  # Cmd+Alt+Space (Finder search)
+        };
+      };
+    };
     CustomUserPreferences = {
       "com.apple.AppleMultitouchTrackpad" = {
         Clicking = true;
