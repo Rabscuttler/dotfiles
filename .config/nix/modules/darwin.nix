@@ -19,20 +19,14 @@
       "1password"
       "alfred"
       "alt-tab"
-      "cursor"
-      "discord"
       "firefox"
       "ghostty"
-      "google-chrome"
       "gpg-suite"
       "karabiner-elements"
       "obsidian"
       "rectangle"
-      "slack"
-      "spotify"
       "tailscale"
       "vlc"
-      "whatsapp"
     ];
   };
 
@@ -76,6 +70,9 @@
       };
     };
   };
+
+  # -- TouchID for sudo --
+  security.pam.services.sudo_local.touchIdAuth = true;
 
   # -- Nix Settings --
   # Determinate Systems manages the Nix daemon, so disable nix-darwin's management
