@@ -38,6 +38,12 @@
       autohide = true;
       tilesize = 54;
       show-recents = false;
+      persistent-apps = [
+        "/Applications/Ghostty.app"
+        "/Applications/Firefox.app"
+        "/Applications/Obsidian.app"
+      ];
+      persistent-others = [];
     };
     NSGlobalDomain = {
       KeyRepeat = 2;
