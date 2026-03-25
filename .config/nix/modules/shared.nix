@@ -27,6 +27,7 @@
   programs.tmux = {
     enable = true;
     mouse = true;
+    escapeTime = 0;
     plugins = with pkgs.tmuxPlugins; [
       yank
       pain-control
