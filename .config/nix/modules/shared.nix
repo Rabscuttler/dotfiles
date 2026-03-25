@@ -44,6 +44,9 @@
       bind -T copy-mode    TripleClick1Pane select-pane \; send -X select-line \; send -X copy-pipe-no-clear "xsel -i"
       bind -T copy-mode-vi TripleClick1Pane select-pane \; send -X select-line \; send -X copy-pipe-no-clear "xsel -i"
       bind -n TripleClick1Pane select-pane \; copy-mode -M \; send -X select-line \; send -X copy-pipe-no-clear "xsel -i"
+      
+      set -g window-style 'fg=colour247,bg=colour236'
+      set -g window-active-style 'fg=colour250,bg=black'
     '';
   };
 
