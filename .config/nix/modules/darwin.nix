@@ -52,6 +52,9 @@
     };
     finder = {
       FXPreferredViewStyle = "Nlsv";
+      FXDefaultSearchScope = "SCev"; # Search the current Mac
+      NewWindowTarget = "Other";
+      NewWindowTargetPath = "file:///Users/laurence/Downloads/";
     };
     # Disable Spotlight shortcut (Cmd+Space) — Alfred replaces it
     CustomSystemPreferences = {
@@ -63,6 +66,10 @@
       };
     };
     CustomUserPreferences = {
+      "com.apple.finder" = {
+        SidebarTagsSctionDisclosedState = false; # Hide tags in sidebar
+        FXPreferredSearchViewStyle = "Nlsv"; # Search results in list view
+      };
       "com.apple.AppleMultitouchTrackpad" = {
         Clicking = true;
         TrackpadThreeFingerDrag = true;
