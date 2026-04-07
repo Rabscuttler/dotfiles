@@ -71,7 +71,7 @@ if [[ "$OS" == "Darwin" ]]; then
     echo "Which Mac is this?"
     echo "  1) personal-mac (MacBook Pro)"
     echo "  2) work-mac (MacBook Air)"
-    read -rp "Choose [1/2]: " choice
+    read -rp "Choose [1/2]: " choice < /dev/tty
     case "$choice" in
       1) NIX_DARWIN_CONFIG="personal-mac" ;;
       2) NIX_DARWIN_CONFIG="work-mac" ;;
