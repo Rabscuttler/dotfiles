@@ -79,28 +79,31 @@ require("lazy").setup({
   },
 },
 
-  -- Treesitter
+  -- Treesitter (main branch — requires nvim 0.12+ and tree-sitter CLI)
   {
-"nvim-treesitter/nvim-treesitter",
+    "nvim-treesitter/nvim-treesitter",
+    branch = "main",
+    lazy = false,
     build = ":TSUpdate",
-    event = { "BufReadPost", "BufNewFile" },
-    opts = {
-      ensure_installed = { "python", "vim" },
-      sync_install = false,
-      auto_install = true,
-      highlight = { enable = true },
-      incremental_selection = {
-        enable = true,
-        keymaps = {
-          init_selection = "<C-n>",
-          node_incremental = "<C-n>",
-          scope_incremental = "<C-s>",
-          node_decremental = "<C-m>",
+    config = function()
+      require("nvim-treesitter").install({
+        "python", "vim", "vimdoc", "lua",
+        "javascript", "typescript", "tsx",
+        "html", "css", "json", "yaml", "markdown", "markdown_inline",
+        "bash",
+      })
+
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = {
+          "python", "vim", "help", "lua",
+          "javascript", "typescript", "typescriptreact",
+          "html", "css", "json", "yaml", "markdown",
+          "sh", "bash",
         },
-      },
-    },
-    config = function(_, opts)
-      require("nvim-treesitter.configs").setup(opts)
+        callback = function()
+          pcall(vim.treesitter.start)
+        end,
+      })
     end,
   },
 

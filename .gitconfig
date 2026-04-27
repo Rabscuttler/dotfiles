@@ -7,6 +7,7 @@
 [user]
 	name = Laurence Watson
 	email = laurence@furbnow.com
+	signingkey = E2864B96CA3A1370
 [gpg]
 	program = gpg
 [commit]
@@ -20,3 +21,5 @@
 	required = true
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
+[init]
+	defaultBranch = main

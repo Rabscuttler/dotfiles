@@ -41,10 +41,6 @@ command -v starship &>/dev/null && eval "$(starship init zsh)"
 [[ -f "$HOME/.atuin/bin/env" ]] && . "$HOME/.atuin/bin/env"
 command -v atuin &>/dev/null && eval "$(atuin init zsh --disable-up-arrow)"
 
-# fzf key bindings and fuzzy completion
-command -v fzf &>/dev/null && source <(fzf --zsh)
-export FZF_DEFAULT_COMMAND='fd --type f --hidden --exclude .git --exclude __pycache__ --exclude .venv'
-
 # Ghostty shell integration
 if [[ -n $GHOSTTY_RESOURCES_DIR ]]; then
   source "$GHOSTTY_RESOURCES_DIR"/shell-integration/zsh/ghostty-integration

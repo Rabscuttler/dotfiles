@@ -11,6 +11,7 @@
     enable = true;
     lfs.enable = true;
     signing = {
+      format = "openpgp";
       key = null; # use default GPG key
       signByDefault = true;
     };
@@ -50,7 +51,8 @@
     '';
   };
 
-  programs.neovim.enable = true;
+  # neovim installed as a plain package (see packages.nix) so home-manager
+  # doesn't manage init.lua and clobber the user-tracked config.
 
   programs.atuin = {
     enable = true;

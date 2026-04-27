@@ -6,7 +6,8 @@ let
     zsh
     tmux
 
-    # neovim — provided by programs.neovim.enable in shared.nix
+    neovim
+    tree-sitter # nvim-treesitter (main branch) parser builds
 
     # Navigation & search
     fd
@@ -27,7 +28,7 @@ let
 
     # Shell tools
     atuin
-    direnv
+    (direnv.overrideAttrs (_: { doCheck = false; })) # upstream test suite hangs in sandbox
     starship
 
     # Python
