@@ -1,10 +1,18 @@
-{ pkgs, lib, ... }:
+{ config, pkgs, lib, ... }:
 {
   # Disable manual generation (speeds up builds)
   manual = {
     html.enable = false;
     manpages.enable = false;
     json.enable = false;
+  };
+
+  # lazygit: keep the user-tracked config at ~/.config/lazygit/config.yml on
+  # every platform. On Linux that's already the XDG default; on macOS lazygit
+  # looks under ~/Library/Application Support, so symlink it there.
+  home.file."Library/Application Support/lazygit/config.yml" = lib.mkIf pkgs.stdenv.isDarwin {
+    source = config.lib.file.mkOutOfStoreSymlink
+      "${config.home.homeDirectory}/.config/lazygit/config.yml";
   };
 
   programs.git = {
