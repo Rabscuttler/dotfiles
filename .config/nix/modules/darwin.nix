@@ -9,16 +9,17 @@
   homebrew = {
     enable = true;
     taps = [
+      "neurosnap/tap"
       "peonping/tap"
     ];
     brews = [
       "mole"
+      "neurosnap/tap/zmx"
       "peonping/tap/peon-ping"
     ];
     casks = [
       "1password"
       "alfred"
-      "alt-tab"
       "firefox"
       "ghostty"
       "gpg-suite"
