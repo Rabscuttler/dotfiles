@@ -70,5 +70,6 @@
   "skipDangerousModePermissionPrompt": true,
   "feedbackSurveyState": {
     "lastShownTime": 1754323154325
-  }
+  },
+  "tui": "fullscreen"
 }

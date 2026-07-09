@@ -100,6 +100,17 @@ push_one_by_one() {
         xargs -I{} git push origin {}:"$target_branch" -f
 }
 
+# Reset DNS after PIA VPN leaves a stale resolver (names fail, ping 1.1.1.1 works)
+if [[ "$OS" == "Darwin" ]]; then
+  fix-dns() {
+    echo "before:"; scutil --dns | grep -A2 "resolver #1" | head -3
+    sudo networksetup -setdnsservers Wi-Fi empty
+    sudo dscacheutil -flushcache
+    sudo killall -HUP mDNSResponder
+    echo "after:";  scutil --dns | grep -A2 "resolver #1" | head -3
+  }
+fi
+
 # Cross-platform clipboard
 if [[ "$OS" == "Darwin" ]]; then
   _clip_copy() { pbcopy; }
