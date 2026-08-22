@@ -38,8 +38,12 @@ command -v direnv &>/dev/null && eval "$(direnv hook zsh)"
 command -v starship &>/dev/null && eval "$(starship init zsh)"
 
 # Atuin shell history
-[[ -f "$HOME/.atuin/bin/env" ]] && . "$HOME/.atuin/bin/env"
-command -v atuin &>/dev/null && eval "$(atuin init zsh --disable-up-arrow)"
+# Config is a symlink into the nix store, and /nix mounts ~60s after boot, so
+# skip init while it is still dangling -- atuin otherwise errors loudly in
+# early login shells.
+if command -v atuin &>/dev/null && [[ -r "${XDG_CONFIG_HOME:-$HOME/.config}/atuin/config.toml" ]]; then
+  eval "$(atuin init zsh --disable-up-arrow)"
+fi
 
 # Ghostty shell integration
 if [[ -n $GHOSTTY_RESOURCES_DIR ]]; then
