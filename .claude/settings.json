@@ -67,9 +67,11 @@
   },
   "alwaysThinkingEnabled": true,
   "effortLevel": "high",
+  "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "feedbackSurveyState": {
     "lastShownTime": 1754323154325
   },
-  "tui": "fullscreen"
+  "agentPushNotifEnabled": true,
+  "inputNeededNotifEnabled": true
 }
