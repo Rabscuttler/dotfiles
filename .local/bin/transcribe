@@ -1,0 +1,190 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["anthropic"]
+# ///
+"""Transcribe an audio file with timestamps using whisper.cpp, optionally summarise with Claude.
+
+Usage:
+    transcribe "~/Downloads/Esther Rantzen Nov 11.WMA"
+    transcribe recording.m4a --summary
+    transcribe recording.wav --model small.en --out ~/notes/
+
+Outputs next to the input (or in --out):
+    <name>.md       paragraphs with [mm:ss] timestamps (the one you want to read)
+    <name>.srt      subtitle file (per-segment timestamps)
+    <name>.txt      plain text
+    <name>.json     raw whisper.cpp output
+    <name>.summary.md   Claude summary (only with --summary)
+
+Requires ffmpeg and whisper-cli (brew install ffmpeg whisper-cpp). The ggml
+model is downloaded to ~/.cache/whisper-cpp on first use.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import shutil
+import subprocess
+import sys
+import tempfile
+import urllib.request
+from pathlib import Path
+
+MODEL_DIR = Path.home() / ".cache" / "whisper-cpp"
+MODEL_URL = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-{name}.bin"
+CLAUDE_MODEL = "claude-opus-5-5"
+
+
+def fmt_ts(ms: int) -> str:
+    s, _ = divmod(ms, 1000)
+    h, s = divmod(s, 3600)
+    m, s = divmod(s, 60)
+    return f"{h}:{m:02d}:{s:02d}" if h else f"{m:02d}:{s:02d}"
+
+
+def ensure_model(name: str) -> Path:
+    path = MODEL_DIR / f"ggml-{name}.bin"
+    if path.exists():
+        return path
+    MODEL_DIR.mkdir(parents=True, exist_ok=True)
+    url = MODEL_URL.format(name=name)
+    print(f"Downloading {url} -> {path}", file=sys.stderr)
+    part = path.with_suffix(".bin.part")
+    urllib.request.urlretrieve(url, part)  # noqa: S310
+    part.rename(path)
+    return path
+
+
+def to_wav(src: Path, dst: Path) -> None:
+    """whisper.cpp wants 16 kHz mono PCM."""
+    subprocess.run(
+        ["ffmpeg", "-y", "-loglevel", "error", "-i", str(src), "-ar", "16000", "-ac", "1", "-c:a", "pcm_s16le", str(dst)],
+        check=True,
+    )
+
+
+def run_whisper(wav: Path, model: Path, out_base: Path, language: str, prompt: str | None) -> list[dict]:
+    cmd = [
+        "whisper-cli",
+        "-m", str(model),
+        "-f", str(wav),
+        "-l", language,
+        "-of", str(out_base),
+        "-otxt", "-osrt", "-oj",
+        "-pp", "-np",
+    ]
+    if prompt:
+        cmd += ["--prompt", prompt]
+    subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL)
+    data = json.loads(out_base.with_suffix(".json").read_text())
+    return data["transcription"]
+
+
+def to_markdown(segments: list[dict], title: str, paragraph_secs: int) -> str:
+    """Group whisper segments into paragraphs, each headed by its start timestamp."""
+    lines = [f"# {title}", ""]
+    para: list[str] = []
+    para_start = 0
+    for seg in segments:
+        start = seg["offsets"]["from"]
+        text = seg["text"].strip()
+        if not text:
+            continue
+        if para and start - para_start >= paragraph_secs * 1000:
+            lines.append(f"**[{fmt_ts(para_start)}]** {' '.join(para)}")
+            lines.append("")
+            para = []
+        if not para:
+            para_start = start
+        para.append(text)
+    if para:
+        lines.append(f"**[{fmt_ts(para_start)}]** {' '.join(para)}")
+    return "\n".join(lines) + "\n"
+
+
+def summarise(transcript_md: str, title: str) -> str:
+    import anthropic
+
+    client = anthropic.Anthropic()
+    with client.messages.stream(
+        model=CLAUDE_MODEL,
+        max_tokens=16000,
+        thinking={"type": "adaptive"},
+        system=(
+            "You are given a machine transcript of an audio recording, with [mm:ss] timestamps. "
+            "It may contain recognition errors; use context to infer what was meant. "
+            "Write in British English."
+        ),
+        messages=[
+            {
+                "role": "user",
+                "content": (
+                    f"Recording: {title}\n\n"
+                    "Produce:\n"
+                    "1. A short summary (a paragraph).\n"
+                    "2. Key points as bullets, each with the timestamp where it comes up.\n"
+                    "3. Any decisions, commitments or follow-ups mentioned, with timestamps.\n"
+                    "4. Notable quotes, with timestamps.\n\n"
+                    f"<transcript>\n{transcript_md}\n</transcript>"
+                ),
+            }
+        ],
+        extra_body={"fallbacks": "default"},
+        extra_headers={"anthropic-beta": "server-side-fallback-2026-07-01"},
+    ) as stream:
+        message = stream.get_final_message()
+    if message.stop_reason == "refusal":
+        raise SystemExit(f"Claude declined to summarise: {message.stop_details}")
+    return "".join(b.text for b in message.content if b.type == "text")
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("audio", type=Path)
+    ap.add_argument("--out", type=Path, help="output directory (default: alongside the input)")
+    ap.add_argument("--model", default="large-v3-turbo", help="whisper.cpp model name (default: large-v3-turbo)")
+    ap.add_argument("--language", default="en", help="spoken language, or 'auto'")
+    ap.add_argument("--paragraph-secs", type=int, default=60, help="start a new timestamped paragraph every N seconds")
+    ap.add_argument("--prompt", help="hint for whisper, e.g. names and vocabulary likely to appear")
+    ap.add_argument("--summary", action="store_true", help=f"also summarise with Claude ({CLAUDE_MODEL})")
+    args = ap.parse_args()
+
+    for tool in ("ffmpeg", "whisper-cli"):
+        if not shutil.which(tool):
+            raise SystemExit(f"{tool} not found: brew install ffmpeg whisper-cpp")
+
+    src = args.audio.expanduser().resolve()
+    if not src.exists():
+        raise SystemExit(f"no such file: {src}")
+    out_dir = (args.out or src.parent).expanduser().resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_base = out_dir / src.stem
+    title = src.stem
+
+    model = ensure_model(args.model)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        wav = Path(tmp) / "audio.wav"
+        print(f"Converting {src.name} -> 16 kHz wav", file=sys.stderr)
+        to_wav(src, wav)
+        print(f"Transcribing with {model.name} (progress below)", file=sys.stderr)
+        segments = run_whisper(wav, model, out_base, args.language, args.prompt)
+
+    md = to_markdown(segments, title, args.paragraph_secs)
+    md_path = out_base.with_suffix(".md")
+    md_path.write_text(md)
+    print(f"\nWrote {md_path}", file=sys.stderr)
+    for ext in (".srt", ".txt", ".json"):
+        print(f"Wrote {out_base.with_suffix(ext)}", file=sys.stderr)
+
+    if args.summary:
+        print(f"Summarising with {CLAUDE_MODEL}", file=sys.stderr)
+        summary_path = out_base.with_suffix(".summary.md")
+        summary_path.write_text(f"# {title} — summary\n\n{summarise(md, title)}\n")
+        print(f"Wrote {summary_path}", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    main()
