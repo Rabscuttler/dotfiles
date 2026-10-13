@@ -22,3 +22,7 @@
 	smudge = git-lfs smudge -- %f
 [init]
 	defaultBranch = main
+# Per-machine settings (untracked, optional), last so they win: e.g. the NUC
+# has no GPG key, so its ~/.gitconfig.local turns commit signing off.
+[include]
+	path = ~/.gitconfig.local
